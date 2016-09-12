@@ -1,0 +1,23 @@
+{
+  "name": "habby",
+  "version": "0.0.0",
+  "description": "",
+  "main": "handler.js",
+  "private": true,
+  "dependencies": {
+    "serverless-offline": "^3.0.0"
+  },
+  "devDependencies": {
+    "serverless-mocha-plugin": "^1.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/habby/habby.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/habby/habby#readme"
+}
