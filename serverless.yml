@@ -32,9 +32,9 @@ provider:
 #            - "Ref" : "ServerlessDeploymentBucket"
 
 # you can overwrite defaults here
-#defaults:
-#  stage: dev
-#  region: us-east-1
+defaults:
+ stage: dev
+ region: us-east-1
 
 # you can add packaging information here
 #package:
@@ -45,6 +45,20 @@ provider:
 #  artifact: my-service-code.zip
 
 functions:
+  authorize:
+    handler: handler.authorize
+    events:
+    - http:
+        path: authorize
+        method: get
+
+  access:
+    handler: handler.access
+    events:
+    - http:
+        path: access
+        method: get    
+
   index:
     handler: handler.index
 
@@ -56,6 +70,23 @@ functions:
 #      - s3: ${env.BUCKET}
 #      - schedule: rate(10 minutes)
 #      - sns: greeter-topic
+
+plugins:
+- serverless-offline
+- serverless-plugin-write-env-vars
+- serverless-mocha-plugin
+- serverless-dynamodb-local
+
+custom:
+  projectName: Habby
+  redis:
+    host: pub-redis-14207.us-east-1-4.1.ec2.garantiadata.com
+    port: 14207
+  writeEnvVars:
+      PROJECT_NAME: ${self:custom.projectName} 
+      REDIS_HOST: ${self:custom.redis.host}
+      REDIS_PORT: ${self:custom.redis.port}
+      
 
 # you can add CloudFormation resource templates here
 #resources:
