@@ -1,11 +1,10 @@
 'use strict';
 
 const config = require('dotenv').config();
-
 const redis = require("redis");
 const client = redis.createClient({
   host: process.env.REDIS_HOST,
-  port: process.env.REDIS_PORT,
+  port: process.env.REDIS_PORT
 });
 
 client.on("error", function (err) {
@@ -33,20 +32,20 @@ module.exports.authorize = (event, context, cb) => {
 };
 
 module.exports.access = (event, context, cb) => {
-  // console.log('event', JSON.stringify(event, null, 2));
-  // console.log('context', JSON.stringify(context, null, 2));
+  console.log('event', JSON.stringify(event, null, 2));
+  console.log('context', JSON.stringify(context, null, 2));
 
-  client.incr('testing-lambda');
-
-  client.get('testing-lambda', (error, data) => {
-    context.succeed({
-        ok : 'ok',
-        q: data
-    });
-  })  
-
+  context.succeed({
+      ok : 'ok'
+  });
 };
 
-module.exports.index = (event, context, cb) => cb(null,
-  { message: 'Go Serverless v1.0! Your function executed successfully!', event }
-);
+module.exports.challenge = (event, context, cb) => {
+  console.log('event', JSON.stringify(event, null, 2));
+
+   if (event.body && 'challenge' in event.body) {
+     cb(null,{ challenge: event.body.challenge})
+   } else {
+    cb(null,{ ok: 'ok'})
+   }
+};
