@@ -8,7 +8,7 @@
     "dotenv": "^2.0.0",
     "redis": "^2.6.2",
     "serverless-dynamodb-local": "git+https://github.com/99xt/serverless-dynamodb-local.git/#v1",
-    "serverless-offline": "^3.0.0",
+    "serverless-offline": "git+https://github.com/dherault/serverless-offline.git/#serverless_v1",
     "serverless-plugin-write-env-vars": "^1.0.1",
     "slack": "^7.7.1"
   },
