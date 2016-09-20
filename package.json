@@ -13,7 +13,8 @@
     "slack": "^7.7.1"
   },
   "devDependencies": {
-    "serverless-mocha-plugin": "^1.0.0"
+    "serverless-mocha-plugin": "^1.0.0",
+    "sinon": "^1.17.6"
   },
   "scripts": {
     "test": "sls invoke test && exit 1"
