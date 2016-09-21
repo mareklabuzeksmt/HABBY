@@ -40,58 +40,45 @@ module.exports.access = (event, context, cb) => {
   });
 };
 
+module.exports.cron = (event, context, cb) => {
+  db.getUsers().then((users) => {
+    if (users.length) {
+      users.map((userId) => {
+        console.log('checking', userId);
+        slack.checkUserPresence(userId).then((status) => {
+          console.log('presence data', status);
+
+          if ('active' === status.presence) {
+            // update flags
+            db.markAsLoggedIn(userId, 1);
+            db.markAsAppearedToday(userId);
+
+            // send reminder
+            db.canRemind(userId)
+            .then((flag) => {
+              if (!flag) return false;
+              if (flag) { return slack.sendReminder(userId) }
+            })
+            .then((reminded) => {
+               if (reminded) db.markAsReminded(userId); 
+            });
+            
+          } else {
+            db.markAsLoggedIn(userId, 0);
+          }
+
+          // logged in (bool) – <user id>_logged_in, e.g. U2423423_logged_in
+          // time of last disappearing on Slack (timestamp) – <user id>_last_disppearance_time
+        })
+      })
+    }
+  })
+
+  context.succeed({status : 'completed'});
+};
+
 module.exports.challenge = (event, context, cb) => {
-  // console.log('event', JSON.stringify(event, null, 2));
-
-  /*
-  id: 'C2B4R4U21',
-       name: 'habby',
-       is_channel: true,
-       created: 1473776083,
-       creator: 'U1290T7QD',
-       is_archived: false,
-       is_general: false,
-       is_member: true,
-       members: [Object],
-       topic: [Object],
-       purpose: [Object],
-       num_members: 8 } 
-  */
-  /*
-  id: 'C2B4R4U21',
-     name: 'habby',
-     is_channel: true,
-     created: 1473776083,
-     creator: 'U1290T7QD',
-     is_archived: false,
-     is_general: false,
-     is_member: true,
-     last_read: '1474444724.000003',
-     latest:
-      { type: 'message',
-        user: 'U2B220MHS',
-        text: '+ update <https://wiki.intive.com/confluence/display/HAB/Pesistent+data>',
-        ts: '1474444724.000003' },
-     unread_count: 0,
-     unread_count_display: 0,
-     members:
-      [ 'U1290T7QD',
-        'U2B220MHS',
-        'U2B4H12F6',
-        'U2B4H3LUU',
-        'U2B4VG2CX',
-        'U2B4YBFQF',
-        'U2BC85JLT',
-        'U2BHZMXPY' ],
-     topic: { value: '', creator: '', last_set: 0 },
-     purpose: { value: '', creator: '', last_set: 0 } } } 
-  */
-  
-  //slack.listChannels();
-  //slack.getChannelInfo('C2B4R4U21');
-  //slack.checkUserPresence('U1290T7QD');
-
-  slack.sendReminder('U1290T7QD');
+  //console.log('event', JSON.stringify(event, null, 2));
 
   if (event.body && 'challenge' in event.body) {
     cb(null,{ challenge: event.body.challenge})

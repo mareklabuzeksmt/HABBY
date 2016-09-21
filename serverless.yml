@@ -59,6 +59,14 @@ functions:
         path: access
         method: get    
 
+  cron:
+    handler: handler.cron
+    events:
+    - http:
+        path: cron
+        method: get  
+    - schedule: rate(5 minutes)        
+
   challenge:
     handler: handler.challenge
     events:
