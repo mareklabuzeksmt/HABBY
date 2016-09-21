@@ -43,56 +43,10 @@ module.exports.access = (event, context, cb) => {
 module.exports.challenge = (event, context, cb) => {
   //console.log('event', JSON.stringify(event, null, 2));
   let slackEvent = event.body.event;
-  /*
-  id: 'C2B4R4U21',
-       name: 'habby',
-       is_channel: true,
-       created: 1473776083,
-       creator: 'U1290T7QD',
-       is_archived: false,
-       is_general: false,
-       is_member: true,
-       members: [Object],
-       topic: [Object],
-       purpose: [Object],
-       num_members: 8 } 
-  */
-  /*
-  id: 'C2B4R4U21',
-     name: 'habby',
-     is_channel: true,
-     created: 1473776083,
-     creator: 'U1290T7QD',
-     is_archived: false,
-     is_general: false,
-     is_member: true,
-     last_read: '1474444724.000003',
-     latest:
-      { type: 'message',
-        user: 'U2B220MHS',
-        text: '+ update <https://wiki.intive.com/confluence/display/HAB/Pesistent+data>',
-        ts: '1474444724.000003' },
-     unread_count: 0,
-     unread_count_display: 0,
-     members:
-      [ 'U1290T7QD',
-        'U2B220MHS',
-        'U2B4H12F6',
-        'U2B4H3LUU',
-        'U2B4VG2CX',
-        'U2B4YBFQF',
-        'U2BC85JLT',
-        'U2BHZMXPY' ],
-     topic: { value: '', creator: '', last_set: 0 },
-     purpose: { value: '', creator: '', last_set: 0 } } } 
-  */
-
-  //console.log('event',JSON.stringify(event, null, 2));
 
   //slack.listChannels();
   //slack.getChannelInfo('C299PHU2D');
   //slack.checkUserPresence('U1290T7QD');
-
   //slack.sendReminder('U1290T7QD');
 
 
