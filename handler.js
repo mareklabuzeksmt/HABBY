@@ -3,7 +3,7 @@
 const config = require('dotenv').config();
 const db = require('./lib/db');
 const slack = require('./lib/slack');
-
+const byeRegexp = /bye-bye|bye|bb|wylogowuję się|kończę/g;
 // init
 db.connect();
 
@@ -42,7 +42,7 @@ module.exports.access = (event, context, cb) => {
 
 module.exports.challenge = (event, context, cb) => {
   //console.log('event', JSON.stringify(event, null, 2));
-
+  let slackEvent = event.body.event;
   /*
   id: 'C2B4R4U21',
        name: 'habby',
@@ -95,11 +95,30 @@ module.exports.challenge = (event, context, cb) => {
 
   //slack.sendReminder('U1290T7QD');
 
-  db.getStatusChannel().then((channel) => {
-    if (event.body.event.type === 'message' && channel === event.body.event.channel) {
-      console.log('message on status channel');
-    }
-  });
+
+  if (slackEvent.type === 'message') {
+    db.getStatusChannel().then((channel) => {
+      if (channel === slackEvent.channel) {
+        console.log('new message on status channel');
+        db.getUserCheckIn(slackEvent.user).then((checkIn) => {
+          if (!checkIn) {
+            console.log(slackEvent.user + ' check in today');
+            db.setUserCheckIn(slackEvent.user);
+            db.setUserCheckInTime(slackEvent.user, slackEvent.ts);
+          } else if (byeRegexp.test(slackEvent.text)) {
+            db.getUserCheckOut(slackEvent.user).then((checkOut) => {
+              if (!checkOut) {
+                console.log(slackEvent.user + ' check out today');
+                db.setUserCheckOut(slackEvent.user);
+                db.setUserCheckOutTime(slackEvent.user, slackEvent.ts);
+              }
+            });
+
+          }
+        });
+      }
+    });
+  }
 
 
 
