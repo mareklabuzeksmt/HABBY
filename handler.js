@@ -16,15 +16,15 @@ module.exports.authorize = (event, context, cb) => {
   ];
 
   // TODO: replace client_id, redirect_uri depend on env
-  let url = 'https://slack.com/oauth/authorize?'+
-    'client_id=' + '36296541748.77041816724' + '&' + 
+  let url = 'https://slack.com/oauth/authorize?' +
+    'client_id=' + '36296541748.77041816724' + '&' +
     'scope=' + 'channels:write,channels:read,bot,chat:write:bot,chat:write:user,im:read,im:write' + '&' +
     'redirect_uri=' + 'https://bbuzqv0311.execute-api.us-east-1.amazonaws.com/dev/access'
     ;
 
-   context.succeed({
-        location : url
-   });
+  context.succeed({
+    location: url
+  });
 };
 
 module.exports.access = (event, context, cb) => {
@@ -35,13 +35,13 @@ module.exports.access = (event, context, cb) => {
     db.saveAccessToken(accessToken);
 
     context.succeed({
-        ok : 'ok'
+      ok: 'ok'
     });
   });
 };
 
 module.exports.challenge = (event, context, cb) => {
-  // console.log('event', JSON.stringify(event, null, 2));
+  //console.log('event', JSON.stringify(event, null, 2));
 
   /*
   id: 'C2B4R4U21',
@@ -86,16 +86,26 @@ module.exports.challenge = (event, context, cb) => {
      topic: { value: '', creator: '', last_set: 0 },
      purpose: { value: '', creator: '', last_set: 0 } } } 
   */
-  
+
+  //console.log('event',JSON.stringify(event, null, 2));
+
   //slack.listChannels();
-  //slack.getChannelInfo('C2B4R4U21');
+  //slack.getChannelInfo('C299PHU2D');
   //slack.checkUserPresence('U1290T7QD');
 
-  slack.sendReminder('U1290T7QD');
+  //slack.sendReminder('U1290T7QD');
+
+  db.getStatusChannel().then((channel) => {
+    if (event.body.event.type === 'message' && channel === event.body.event.channel) {
+      console.log('message on status channel');
+    }
+  });
+
+
 
   if (event.body && 'challenge' in event.body) {
-    cb(null,{ challenge: event.body.challenge})
+    cb(null, { challenge: event.body.challenge })
   } else {
-    cb(null,{ ok: 'ok'})
+    cb(null, { ok: 'ok' })
   }
 };
