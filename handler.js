@@ -40,15 +40,46 @@ module.exports.access = (event, context, cb) => {
   });
 };
 
+module.exports.cron = (event, context, cb) => {
+  db.getUsers().then((users) => {
+    if (users.length) {
+      users.map((userId) => {
+        console.log('checking', userId);
+        slack.checkUserPresence(userId).then((status) => {
+          console.log('presence data', status);
+
+          if ('active' === status.presence) {
+            // update flags
+            db.markAsLoggedIn(userId, 1);
+            db.markAsAppearedToday(userId);
+
+            // send reminder
+            db.canRemind(userId)
+            .then((flag) => {
+              if (!flag) return false;
+              if (flag) { return slack.sendReminder(userId) }
+            })
+            .then((reminded) => {
+               if (reminded) db.markAsReminded(userId); 
+            });
+            
+          } else {
+            db.markAsLoggedIn(userId, 0);
+          }
+
+          // logged in (bool) – <user id>_logged_in, e.g. U2423423_logged_in
+          // time of last disappearing on Slack (timestamp) – <user id>_last_disppearance_time
+        })
+      })
+    }
+  })
+
+  context.succeed({status : 'completed'});
+};
+
 module.exports.challenge = (event, context, cb) => {
   //console.log('event', JSON.stringify(event, null, 2));
   let slackEvent = event.body.event;
-
-  //slack.listChannels();
-  //slack.getChannelInfo('C299PHU2D');
-  //slack.checkUserPresence('U1290T7QD');
-  //slack.sendReminder('U1290T7QD');
-
 
   if (slackEvent.type === 'message') {
     db.getStatusChannel().then((channel) => {
@@ -73,8 +104,6 @@ module.exports.challenge = (event, context, cb) => {
       }
     });
   }
-
-
 
   if (event.body && 'challenge' in event.body) {
     cb(null, { challenge: event.body.challenge })
