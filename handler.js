@@ -41,40 +41,60 @@ module.exports.access = (event, context, cb) => {
 };
 
 module.exports.cron = (event, context, cb) => {
-  db.getUsers().then((users) => {
-    if (users.length) {
-      users.map((userId) => {
-        console.log('checking', userId);
-        slack.checkUserPresence(userId).then((status) => {
-          console.log('presence data', status);
-
+  let process = (users) => {
+    let promise = new Promise((resolve, reject) => {
+      users.forEach((userId, index) => {
+        console.log('checking', userId, index, users.length);
+        slack.checkUserPresence(userId)
+        .then((status) => {
+          console.log('presence data', JSON.stringify(status, null, 2));
           if ('active' === status.presence) {
             // update flags
             db.markAsLoggedIn(userId, 1);
             db.markAsAppearedToday(userId);
-
-            // send reminder
-            db.canRemind(userId)
-            .then((flag) => {
-              if (!flag) return false;
-              if (flag) { return slack.sendReminder(userId) }
-            })
-            .then((reminded) => {
-               if (reminded) db.markAsReminded(userId); 
-            });
-            
           } else {
             db.markAsLoggedIn(userId, 0);
           }
 
-          // logged in (bool) – <user id>_logged_in, e.g. U2423423_logged_in
-          // time of last disappearing on Slack (timestamp) – <user id>_last_disppearance_time
+          return status.presence;
+        })
+        .then((status) => {
+          if ('active' === status) return db.canRemind(userId);
+          return false;
+        })
+        .then((flag) => {
+          if (!flag) return false;
+          if (flag) return slack.sendReminder(userId);
+        })
+        .then((reminded) => {
+          if (!reminded) return false;
+          if (reminded) db.markAsReminded(userId); 
+        })
+        .then(() => {
+          if (index === users.length - 1) {
+            resolve('completed');
+          }
         })
       })
+    })
+
+    return promise;
+  }
+
+  db.getUsers()
+  .then((users) => {
+    if (users.length) {
+      process(users).then(() => {
+        context.succeed({status : 'completed'});  
+      });
+    } else {
+      context.succeed({status : 'completed'});  
     }
   })
 
-  context.succeed({status : 'completed'});
+  
+
+
 };
 
 module.exports.challenge = (event, context, cb) => {
