@@ -65,7 +65,9 @@ functions:
     - http:
         path: cron
         method: get  
-    - schedule: rate(5 minutes)        
+    - schedule:
+        rate: rate(20 minutes)
+        enabled: true 
 
   challenge:
     handler: handler.challenge
