@@ -69,6 +69,16 @@ functions:
         rate: rate(20 minutes)
         enabled: true 
 
+  midnight:
+    handler: methods/midnight.midnight
+    events:
+    - http:
+        path: midnight
+        method: get  
+    - schedule:
+        rate: cron(0 0 * * * *)
+        enabled: true 
+
   challenge:
     handler: handler.challenge
     events:

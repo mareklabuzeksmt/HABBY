@@ -41,10 +41,13 @@ module.exports.access = (event, context, cb) => {
 };
 
 module.exports.cron = (event, context, cb) => {
+  // TODO: check for new users on a channel
+  // TODO: protect againt paralle execution of cron and midnight scripts
   let process = (users) => {
     let promise = new Promise((resolve, reject) => {
       users.forEach((userId, index) => {
         console.log('checking', userId, index, users.length);
+        // TODO: skip already check in/reminded
         slack.checkUserPresence(userId)
         .then((status) => {
           console.log('presence data', JSON.stringify(status, null, 2));
@@ -92,13 +95,11 @@ module.exports.cron = (event, context, cb) => {
     }
   })
 
-  
-
-
 };
 
 module.exports.challenge = (event, context, cb) => {
-  //console.log('event', JSON.stringify(event, null, 2));
+  console.log('event', JSON.stringify(event, null, 2));
+  
   let slackEvent = event.body.event;
 
   if (slackEvent.type === 'message') {
