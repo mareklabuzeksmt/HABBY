@@ -4,6 +4,9 @@ const config = require('dotenv').config();
 const db = require('./lib/db');
 const slack = require('./lib/slack');
 const byeRegexp = /bye-bye|bye|bb|wylogowuję się|kończę/g;
+const reportRegexp = /((?:\/raport\sza\s(?:ostatni?|ten?|poprzedni?|)\s(?:tydzień?|miesiąc?)))|((?:\/report\sfor\s(?:last?|this?|previous?)\s(?:week?|monthc?)))/g;
+const reports = require('./lib/report');
+
 // init
 db.connect();
 
@@ -121,6 +124,17 @@ module.exports.challenge = (event, context, cb) => {
         });
   }
 
+  let processReportMessage = (report, slackEvent) => {
+    let queryParams = report.split(' ');
+    let p1 = queryParams[2], p2 = queryParams[3];
+    let reportPeriod = reports.getPeriod(p1,p2);
+    //console.log(p1,p2,reportPeriod);
+    reports.generateTeamReport(reportPeriod)
+      .then((results)=>{
+        console.log(results);
+      });
+  }
+
   if (slackEvent.type === 'message') {
     db.getStatusChannel().then((channel) => {
       //check if message on status channel
@@ -137,11 +151,17 @@ module.exports.challenge = (event, context, cb) => {
         });
       }
     });
+
+    let reportMatches = slackEvent.text.match(reportRegexp);
+    
+    if(reportMatches) {
+      
+      console.log(reportMatches[0]);
+      processReportMessage(reportMatches[0],slackEvent);
+
+    }
   }
 
-  // db.getUserDirectChannels().then((directChannels)=>{
-  //   console.log(directChannels);
-  // });
 
   if (event.body && 'challenge' in event.body) {
     cb(null, { challenge: event.body.challenge })
