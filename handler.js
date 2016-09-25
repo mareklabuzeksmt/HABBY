@@ -128,10 +128,15 @@ module.exports.challenge = (event, context, cb) => {
     let queryParams = report.split(' ');
     let p1 = queryParams[2], p2 = queryParams[3];
     let reportPeriod = reports.getPeriod(p1,p2);
-    //console.log(p1,p2,reportPeriod);
+    reports.generateUserReport(slackEvent.user, reportPeriod)
+      .then((results)=>{
+        console.log(results);
+        slack.sendReport(slackEvent.user, results);
+      });
     reports.generateTeamReport(reportPeriod)
       .then((results)=>{
         console.log(results);
+        slack.sendReport(slackEvent.user, results);
       });
   }
 
@@ -152,7 +157,7 @@ module.exports.challenge = (event, context, cb) => {
       }
     });
 
-    let reportMatches = slackEvent.text.match(reportRegexp);
+    let reportMatches = slackEvent.text.match(reports.userReportRegexp);
     
     if(reportMatches) {
       
