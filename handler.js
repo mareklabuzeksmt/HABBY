@@ -124,20 +124,32 @@ module.exports.challenge = (event, context, cb) => {
         });
   }
 
-  let processReportMessage = (report, slackEvent) => {
-    let queryParams = report.split(' ');
-    let p1 = queryParams[2], p2 = queryParams[3];
-    let reportPeriod = reports.getPeriod(p1,p2);
-    reports.generateUserReport(slackEvent.user, reportPeriod)
-      .then((results)=>{
-        console.log(results);
-        slack.sendReport(slackEvent.user, results);
-      });
-    reports.generateTeamReport(reportPeriod)
-      .then((results)=>{
-        console.log(results);
-        slack.sendReport(slackEvent.user, results);
-      });
+  let processReportMessage = (userReports, teamReports, slackEvent) => {
+    let queryParams, p1, p2, reportPeriod;
+    if(userReports) {
+      queryParams = userReports[0].split(' ');
+      p1 = queryParams[2];
+      p2 = queryParams[3];
+      reportPeriod = reports.getPeriod(p1,p2);
+      reports.generateUserReport(slackEvent.user, reportPeriod)
+        .then((results)=>{
+          console.log(results);
+          slack.sendReport(slackEvent.user, results);
+        });
+    } else if(teamReports) {
+      queryParams = teamReports[0].split(' ');
+      p1 = queryParams[2];
+      p2 = queryParams[3];
+      reportPeriod = reports.getPeriod(p1,p2);
+      reports.generateTeamReport(reportPeriod,slackEvent.user)
+        .then((results)=>{
+          console.log(results);
+          slack.sendReport(slackEvent.user, results);
+        })
+        .catch((error)=>{
+          console.log(error);
+        });
+    }
   }
 
   if (slackEvent.type === 'message') {
@@ -157,16 +169,11 @@ module.exports.challenge = (event, context, cb) => {
       }
     });
 
-    let reportMatches = slackEvent.text.match(reports.userReportRegexp);
+    let userReportMatches = slackEvent.text.match(reports.userReportRegexp);
+    let teamReportMatches = slackEvent.text.match(reports.teamReportRegexp);
+    processReportMessage(userReportMatches,teamReportMatches,slackEvent);
     
-    if(reportMatches) {
-      
-      console.log(reportMatches[0]);
-      processReportMessage(reportMatches[0],slackEvent);
-
-    }
   }
-
 
   if (event.body && 'challenge' in event.body) {
     cb(null, { challenge: event.body.challenge })
