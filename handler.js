@@ -102,11 +102,8 @@ module.exports.challenge = (event, context, cb) => {
   
   let slackEvent = event.body.event;
 
-  if (slackEvent.type === 'message') {
-    db.getStatusChannel().then((channel) => {
-      if (channel === slackEvent.channel) {
-        console.log('new message on status channel');
-        db.getUserCheckIn(slackEvent.user).then((checkIn) => {
+  let processMessageEvent = (slackEvent) => {
+     db.getUserCheckIn(slackEvent.user).then((checkIn) => {
           if (!checkIn) {
             console.log(slackEvent.user + ' check in today');
             db.setUserCheckIn(slackEvent.user);
@@ -122,9 +119,29 @@ module.exports.challenge = (event, context, cb) => {
 
           }
         });
+  }
+
+  if (slackEvent.type === 'message') {
+    db.getStatusChannel().then((channel) => {
+      //check if message on status channel
+      if (channel === slackEvent.channel) {
+        console.log('new message on status channel');
+        processMessageEvent(slackEvent);
+      } else {
+        //check if message on direct channel
+        db.getDirectChannels().then((channels) => {
+          if(channels.length && channels.indexOf(slackEvent.channel) > -1) {
+            console.log('new message on direct channel');
+            processMessageEvent(slackEvent);
+          }
+        });
       }
     });
   }
+
+  // db.getUserDirectChannels().then((directChannels)=>{
+  //   console.log(directChannels);
+  // });
 
   if (event.body && 'challenge' in event.body) {
     cb(null, { challenge: event.body.challenge })
