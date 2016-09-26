@@ -10,9 +10,6 @@ const reports = require('./lib/report');
 db.connect();
 
 module.exports.authorize = (event, context, cb) => {
-  // console.log('event', JSON.stringify(event, null, 2));
-  // console.log('context', JSON.stringify(context, null, 2));
-
   let permissions = [
     'channels:write,channels:read,bot,chat:write:bot,chat:write:user,im:read,im:write'
   ];
@@ -27,12 +24,9 @@ module.exports.authorize = (event, context, cb) => {
   context.succeed({
     location: url
   });
-};
+}
 
 module.exports.access = (event, context, cb) => {
-  //console.log('event', JSON.stringify(event, null, 2));
-  //console.log('context', JSON.stringify(context, null, 2));
-
   slack.access(event.body.code, (err, accessToken) => {
     db.saveAccessToken(accessToken);
 
@@ -40,12 +34,14 @@ module.exports.access = (event, context, cb) => {
       ok: 'ok'
     });
   });
-};
+}
 
 module.exports.challenge = (event, context, cb) => {
   console.log('event', JSON.stringify(event, null, 2));
   
-  let slackEvent = event.body.event;
+  event.body = event.body || {}
+
+  let slackEvent = 'event' in event.body ? event.body.event : null
 
   let processMessageEvent = (slackEvent) => {
      db.getUserCheckIn(slackEvent.user).then((checkIn) => {
@@ -94,7 +90,11 @@ module.exports.challenge = (event, context, cb) => {
     }
   }
 
-  if (slackEvent.type === 'message') {
+  if ('challenge' in event.body) {
+    console.log('challenge')
+     context.succeed({ challenge: event.body.challenge })
+  } else if (slackEvent && slackEvent.type === 'message') {
+    console.log('message')
     db.getStatusChannel().then((channel) => {
       //check if message on status channel
       if (channel === slackEvent.channel) {
@@ -110,15 +110,10 @@ module.exports.challenge = (event, context, cb) => {
             let teamReportMatches = slackEvent.text.match(reports.teamReportRegexp);
             processReportMessage(userReportMatches,teamReportMatches,slackEvent);
           }
-        });
+        })
       }
-    });  
-    
-  }
-
-  if (event.body && 'challenge' in event.body) {
-    cb(null, { challenge: event.body.challenge })
+    }) 
   } else {
-    cb(null, { ok: 'ok' })
+    context.fail('Unsupported operation')
   }
-};
+}
