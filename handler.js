@@ -107,13 +107,13 @@ module.exports.challenge = (event, context, cb) => {
 
   let processMessageEvent = (slackEvent) => {
      db.getUserCheckIn(slackEvent.user).then((checkIn) => {
-          if (!checkIn) {
+          if (checkIn == false) {
             console.log(slackEvent.user + ' check in today');
             db.setUserCheckIn(slackEvent.user);
             db.setUserCheckInTime(slackEvent.user, slackEvent.ts);
           } else if (byeRegexp.test(slackEvent.text)) {
             db.getUserCheckOut(slackEvent.user).then((checkOut) => {
-              if (!checkOut) {
+              if (checkOut == false) {
                 console.log(slackEvent.user + ' check out today');
                 db.setUserCheckOut(slackEvent.user);
                 db.setUserCheckOutTime(slackEvent.user, slackEvent.ts);
