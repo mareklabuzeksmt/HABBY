@@ -37,10 +37,11 @@ defaults:
  region: us-east-1
 
 # you can add packaging information here
-#package:
+package:
 #  include:
 #    - include-me.js
-#  exclude:
+ exclude:
+  -.git
 #    - exclude-me.js
 #  artifact: my-service-code.zip
 
@@ -75,9 +76,7 @@ functions:
     - http:
         path: midnight
         method: get  
-    - schedule:
-        rate: cron(0 0 * * * *)
-        enabled: true 
+    # - schedule: cron(0 0 * * * *)
 
   challenge:
     handler: handler.challenge
@@ -86,8 +85,12 @@ functions:
         path: challenge
         method: post  
 
-  index:
-    handler: handler.index
+  debug:
+    handler: methods/dev.debug
+    events:
+    - http:
+        path: debug
+        method: get  
 
 #    you can add any of the following events
 #    events:
