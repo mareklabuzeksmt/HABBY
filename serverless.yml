@@ -61,7 +61,7 @@ functions:
         method: get    
 
   cron:
-    handler: handler.cron
+    handler: methods/cron.cron
     timeout: 30
     events:
     - http:
