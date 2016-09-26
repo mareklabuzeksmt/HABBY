@@ -77,9 +77,9 @@ functions:
     events:
     - http:
         path: midnight
-        method: get  
-    - schedule: cron(0 0 * * * *)
-
+        method: get
+    #- schedule: cron(0 0 * * * *)
+  
   challenge:
     handler: handler.challenge
     events:
