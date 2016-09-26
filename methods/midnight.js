@@ -28,7 +28,7 @@ module.exports.midnight = (event, context, cb) => {
 
                   promises.push(db.getUserCheckInTime(user))
                   promises.push(db.getUserCheckOutTime(user))
-                  promises.push(db.getUserHours(user, [`week-${currentWeek}`, `month-${currentMonth}`]))
+                  promises.push(db.getUserHours(user, [`week-${currentWeek}`, `week-${currentWeek}-days`, `month-${currentMonth}`,`month-${currentMonth}-days`]))
 
                   Promise.all(promises).then((results) => {
                     let hours = results[1] - results[0];
@@ -41,7 +41,9 @@ module.exports.midnight = (event, context, cb) => {
                     let payroll = {
                       [`day-${currentDay}`] : hours,
                       [`week-${currentWeek}`] : Number(results[2][0]) + hours,
-                      [`month-${currentMonth}`] : Number(results[2][1]) + hours
+                      [`week-${currentWeek}-days`]: Number(results[2][1]) + (hours > 0 ? 1: 0),
+                      [`month-${currentMonth}`] : Number(results[2][2]) + hours,
+                      [`month-${currentMonth}-days`] : Number(results[2][3]) + (hours > 0 ? 1: 0)
                     }
 
                     console.log('calculated payroll', payroll);    
