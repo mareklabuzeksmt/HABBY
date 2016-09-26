@@ -52,6 +52,7 @@ module.exports.cron = (event, context, cb) => {
         .then((status) => {
           console.log('presence data', JSON.stringify(status, null, 2));
           if ('active' === status.presence) {
+            console.log('mark as logged in');
             // update flags
             db.markAsLoggedIn(userId, 1);
             db.markAsAppearedToday(userId);
@@ -63,7 +64,7 @@ module.exports.cron = (event, context, cb) => {
         })
         .then((status) => {
           if ('active' === status) return db.canRemind(userId);
-          return false;
+          if ('active' !== status) return false;
         })
         .then((flag) => {
           if (!flag) return false;
@@ -74,8 +75,10 @@ module.exports.cron = (event, context, cb) => {
           if (reminded) db.markAsReminded(userId); 
         })
         .then(() => {
+          console.log(index, users.length, index === users.length - 1);
           if (index === users.length - 1) {
-            resolve('completed');
+            console.log('completed')
+            resolve('completed')
           }
         })
       })
