@@ -4,7 +4,6 @@ const config = require('dotenv').config();
 const db = require('./lib/db');
 const slack = require('./lib/slack');
 const byeRegexp = /bye-bye|bye|bb|wylogowuję się|kończę/g;
-const reportRegexp = /((?:\/raport\sza\s(?:ostatni?|ten?|poprzedni?|)\s(?:tydzień?|miesiąc?)))|((?:\/report\sfor\s(?:last?|this?|previous?)\s(?:week?|monthc?)))/g;
 const reports = require('./lib/report');
 
 // init
