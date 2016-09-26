@@ -82,6 +82,7 @@ functions:
   
   challenge:
     handler: handler.challenge
+    timeout: 15
     events:
     - http:
         path: challenge
