@@ -1,4 +1,4 @@
-'use strict';
+  'use strict';
 
 const config = require('dotenv').config();
 const db = require('../lib/db');
@@ -11,61 +11,109 @@ db.connect();
 module.exports.cron = (event, context, cb) => {
   // TODO: check for new users on a channel
   // TODO: protect againt paralle execution of cron and midnight scripts
-  let process = (users) => {
-    let promise = new Promise((resolve, reject) => {
-      users.forEach((userId, index) => {
-        console.log('checking', userId, index, users.length);
-        // TODO: skip already check in/reminded
+  async.waterfall([
+    (callback) => {
+      db.getUsers().then((users) => { callback(null, users) })
+    },
+    (users, callback) => {
+      console.log('users', users);
+
+      async.each(users, (userId, loop) => {
+        console.log('processing:', userId)
+        
         slack.checkUserPresence(userId)
         .then((status) => {
-          console.log('presence data', JSON.stringify(status, null, 2));
-          if ('active' === status.presence) {
-            console.log('mark as logged in');
-            // update flags
-            //db.markAsLoggedIn(userId, 1);
-            //db.markAsAppearedToday(userId);
-          } else {
-            // db.markAsLoggedIn(userId, 0);
-          }
+            async.waterfall([
+              (callback) => {
+                // check if logged in
+                if ('active' === status.presence) {
+                  console.log(userId + ':mark as logged in')
+                  Promise.all([
+                    db.markAsLoggedIn(userId, 1),
+                    db.markAsAppearedToday(userId)
+                  ])
+                  .then(() => {
+                    console.log(userId + ':marked as logged in')
+                    callback(null);
+                  })
+                  .catch(() => {
+                    callback('Error: User not marked as logged in.')
+                  })
+                } else {
+                  callback(null)
+                }
+              },
+              (callback) => {
+                // check if logged out
+                if ('active' !== status.presence) {
+                  console.log(userId + ':mark as logged out')
+                  Promise.all([
+                    db.markAsLoggedIn(userId, 0)
+                  ])
+                  .then(() => {
+                    console.log(userId + ':marked as logged out')
+                    callback(null);
+                  })
+                  .catch(() => {
+                    callback('Error: user not marked as logged out.')
+                  })
+                } else {
+                  callback(null)
+                }
+              },       
+              (callback) => {
+                db.canRemind(userId)
+                .then((can) => {
+                  console.log(userId + ':Can remind?', can)
+                  callback(null, can)
+                })
+                .catch(()=> {
+                  callback('Error: could not get user remind status.')
+                })
+              },    
+              (can, callback) => {
+                if (can) {
+                  slack.sendReminder(userId)
+                  .then(() => {
+                    console.log('User reminded on slack')
+                    callback(null, true)  
+                  })
+                  .catch(() => {
+                    callback('Error: could not get user remind status.')
+                  })                    
+                } else {
+                  callback(null, false)
+                }
+              },     
+              (reminded, callback) => {
+                if (reminded) {
+                  db.markAsReminded(userId)
+                  .then(() => {
+                    console.log('User marked as reminded')
+                    callback(null, true)  
+                  })
+                  .catch(() => {
+                    callback('Error: could not mark user reminded.')
+                  })                    
+                } else {
+                  callback(null, true)
+                }
+              },                                                
+            ], (err, result) => {
+              loop(err, result)  
+            })
+        })
+        .catch((err) => {
+          loop(err)  
+        })
 
-          return status.presence;
-        })
-        .then((status) => {
-          if ('active' === status) return db.canRemind(userId);
-          if ('active' !== status) return false;
-        })
-        .then((flag) => {
-          // if (!flag) return false;
-          // if (flag) return slack.sendReminder(userId);
-          return true;
-        })
-        .then((reminded) => {
-          return true;
-          // if (!reminded) return false;
-          // if (reminded) db.markAsReminded(userId); 
-        })
-        .then(() => {
-          console.log(index, users.length, index === users.length - 1);
-          if (index === users.length - 1) {
-            console.log('completed')
-            resolve('completed')
-          }
-        })
-      })
-    })
-
-    return promise;
-  }
-
-  db.getUsers()
-  .then((users) => {
-    if (users.length) {
-      process(users).then(() => {
-        context.succeed({status : 'completed'});  
-      });
-    } else {
-      context.succeed({status : 'completed'});  
+      }, (err) => {
+        callback(null)
+      });      
     }
+  ], (err, result) => {
+        err ?
+          context.fail(err) :
+          context.succeed({status : 'completed'})
   })
-
-};
+}

@@ -110,6 +110,7 @@ plugins:
 
 custom:
   projectName: Habby
+  remindTimout: 15
   redis:
     host: pub-redis-14207.us-east-1-4.1.ec2.garantiadata.com
     port: 14207
@@ -117,6 +118,7 @@ custom:
       PROJECT_NAME: ${self:custom.projectName} 
       REDIS_HOST: ${self:custom.redis.host}
       REDIS_PORT: ${self:custom.redis.port}
+      REMIND_TIMOUT: ${self:custom.remindTimout}
       
 
 # you can add CloudFormation resource templates here
