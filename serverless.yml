@@ -62,6 +62,7 @@ functions:
 
   cron:
     handler: handler.cron
+    timeout: 30
     events:
     - http:
         path: cron
@@ -72,11 +73,12 @@ functions:
 
   midnight:
     handler: methods/midnight.midnight
+    timeout: 30
     events:
     - http:
         path: midnight
         method: get  
-    # - schedule: cron(0 0 * * * *)
+    - schedule: cron(0 0 * * * *)
 
   challenge:
     handler: handler.challenge
