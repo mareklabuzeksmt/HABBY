@@ -138,8 +138,8 @@ module.exports.challenge = (event, context, cb) => {
         });
     } else if(teamReports) {
       queryParams = teamReports[0].split(' ');
-      p1 = queryParams[2];
-      p2 = queryParams[3];
+      p1 = queryParams[queryParams.length > 4 ? 3 : 2]; //team report for last week = 5, reports for last week = 4
+      p2 = queryParams[queryParams.length > 4 ? 4 : 3];
       reportPeriod = reports.getPeriod(p1,p2);
       reports.generateTeamReport(reportPeriod,slackEvent.user)
         .then((results)=>{

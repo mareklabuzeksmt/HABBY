@@ -18,7 +18,7 @@ module.exports.midnight = (event, context, cb) => {
                 const currentDay =  time.currentDay()
                 const currentWeek = time.currentWeek()
                 const currentMonth = time.currentMonth()
-
+                
                 async.each(users, (user, callback) => {
                   console.log('processing:', user)
                   let promises = [];
@@ -31,19 +31,23 @@ module.exports.midnight = (event, context, cb) => {
                   promises.push(db.getUserHours(user, [`week-${currentWeek}`, `week-${currentWeek}-days`, `month-${currentMonth}`,`month-${currentMonth}-days`]))
 
                   Promise.all(promises).then((results) => {
-                    let hours = results[1] - results[0];
+                    let seconds = 0;
+                    if(results[1] && results[0]) {
+                      seconds = results[1] - results[0];
+                      console.log('new hours',seconds);
+                    }
                     
                     console.log('existing payroll', results[2]);    
                     console.log('time',results[1],'-',results[0],'=', results[1] - results[0]);
 
-                    hours = hours >= 0 ? hours: 0
+                    seconds = seconds >= 0 ? seconds: 0
 
                     let payroll = {
-                      [`day-${currentDay}`] : hours,
-                      [`week-${currentWeek}`] : Number(results[2][0]) + hours,
-                      [`week-${currentWeek}-days`]: Number(results[2][1]) + (hours > 0 ? 1: 0),
-                      [`month-${currentMonth}`] : Number(results[2][2]) + hours,
-                      [`month-${currentMonth}-days`] : Number(results[2][3]) + (hours > 0 ? 1: 0)
+                      [`day-${currentDay}`] : seconds,
+                      [`week-${currentWeek}`] : Number(results[2][0]) + seconds,
+                      [`week-${currentWeek}-days`]: Number(results[2][1]) + (seconds > 0 ? 1: 0),
+                      [`month-${currentMonth}`] : Number(results[2][2]) + seconds,
+                      [`month-${currentMonth}-days`] : Number(results[2][3]) + (seconds > 0 ? 1: 0)
                     }
 
                     console.log('calculated payroll', payroll);    
