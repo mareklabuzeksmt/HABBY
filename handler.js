@@ -159,19 +159,18 @@ module.exports.challenge = (event, context, cb) => {
         console.log('new message on status channel');
         processMessageEvent(slackEvent);
       } else {
-        //check if message on direct channel
+        //check if message on direct channel and process /report query
         db.getDirectChannels().then((channels) => {
           if(channels.length && channels.indexOf(slackEvent.channel) > -1) {
             console.log('new message on direct channel');
-            processMessageEvent(slackEvent);
+            //processMessageEvent(slackEvent);
+            let userReportMatches = slackEvent.text.match(reports.userReportRegexp);
+            let teamReportMatches = slackEvent.text.match(reports.teamReportRegexp);
+            processReportMessage(userReportMatches,teamReportMatches,slackEvent);
           }
         });
       }
-    });
-
-    let userReportMatches = slackEvent.text.match(reports.userReportRegexp);
-    let teamReportMatches = slackEvent.text.match(reports.teamReportRegexp);
-    processReportMessage(userReportMatches,teamReportMatches,slackEvent);
+    });  
     
   }
 
