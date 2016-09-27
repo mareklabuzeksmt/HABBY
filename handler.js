@@ -123,33 +123,45 @@ module.exports.challenge = (event, context, cb) => {
     return promise
   }
   
+  let processReportEvent = (userReports, teamReports, slackEvent) => {
+    let promise = new Promise((resolve, reject) => {
+      let queryParams, p1, p2, reportPeriod;
+      if(userReports) {
+        console.log('Process user report request');
+        queryParams = userReports[0].split(' ');
+        p1 = queryParams[2];
+        p2 = queryParams[3];
+        reportPeriod = reports.getPeriod(p1,p2);
+        reports.generateUserReport(slackEvent.user, reportPeriod)
+          .then((report)=>{
+            slack.sendReport(slackEvent.user, report);
+            resolve(report);
+          })
+          .catch((error)=>{
+            reject(error);
+            console.log(error);
+          });;
+      } else if(teamReports) {
+        console.log('Process team report request');
+        queryParams = teamReports[0].split(' ');
+        p1 = queryParams[queryParams.length > 4 ? 3 : 2]; //team report for last week = 5, reports for last week = 4
+        p2 = queryParams[queryParams.length > 4 ? 4 : 3];
+        reportPeriod = reports.getPeriod(p1,p2);
+        reports.generateTeamReport(reportPeriod, slackEvent.user)
+          .then((report)=>{
+            slack.sendReport(slackEvent.user, report);
+            resolve(report);
+          })
+          .catch((error)=>{
+            reject(error);
+            console.log(error);
+          });
+      } else {
+        reject('No report queries to process');
+      }
+    });
 
-  let processReportMessage = (userReports, teamReports, slackEvent) => {
-    let queryParams, p1, p2, reportPeriod;
-    if(userReports) {
-      queryParams = userReports[0].split(' ');
-      p1 = queryParams[2];
-      p2 = queryParams[3];
-      reportPeriod = reports.getPeriod(p1,p2);
-      reports.generateUserReport(slackEvent.user, reportPeriod)
-        .then((results)=>{
-          console.log(results);
-          slack.sendReport(slackEvent.user, results);
-        });
-    } else if(teamReports) {
-      queryParams = teamReports[0].split(' ');
-      p1 = queryParams[queryParams.length > 4 ? 3 : 2]; //team report for last week = 5, reports for last week = 4
-      p2 = queryParams[queryParams.length > 4 ? 4 : 3];
-      reportPeriod = reports.getPeriod(p1,p2);
-      reports.generateTeamReport(reportPeriod,slackEvent.user)
-        .then((results)=>{
-          console.log(results);
-          slack.sendReport(slackEvent.user, results);
-        })
-        .catch((error)=>{
-          console.log(error);
-        });
-    }
+    return promise;
   }
 
   if ('challenge' in event.body) {
@@ -182,7 +194,18 @@ module.exports.challenge = (event, context, cb) => {
             
             let userReportMatches = slackEvent.text.match(reports.userReportRegexp);
             let teamReportMatches = slackEvent.text.match(reports.teamReportRegexp);
-            processReportMessage(userReportMatches,teamReportMatches,slackEvent);
+            if(userReportMatches || teamReportMatches) {
+            processReportEvent(userReportMatches,teamReportMatches,slackEvent)
+              .then(() => {
+                context.succeed({status: 'ok'})
+              })
+              .catch((err) => {
+                console.log(err)
+                context.fail('Error process report event failed. ' + err.message)
+              });
+            } else {
+
+            }
           }
         })
       }
