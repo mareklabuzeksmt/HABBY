@@ -204,7 +204,7 @@ module.exports.challenge = (event, context, cb) => {
                 context.fail('Error process report event failed. ' + err.message)
               });
             } else {
-
+              context.succeed({status: 'ok'})
             }
           }
         })
