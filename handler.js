@@ -134,13 +134,19 @@ module.exports.challenge = (event, context, cb) => {
         reportPeriod = reports.getPeriod(p1,p2);
         reports.generateUserReport(slackEvent.user, reportPeriod)
           .then((report)=>{
-            slack.sendReport(slackEvent.user, report);
-            resolve(report);
+            slack.sendReport(slackEvent.user, report)
+              .then((data)=>{
+                resolve(report);
+              })
+              .catch((error)=>{
+                reject('problem with sending message to slack' + error.message);
+                console.log(error);
+              });
           })
           .catch((error)=>{
             reject(error);
             console.log(error);
-          });;
+          });
       } else if(teamReports) {
         console.log('Process team report request');
         queryParams = teamReports[0].split(' ');
@@ -149,8 +155,14 @@ module.exports.challenge = (event, context, cb) => {
         reportPeriod = reports.getPeriod(p1,p2);
         reports.generateTeamReport(reportPeriod, slackEvent.user)
           .then((report)=>{
-            slack.sendReport(slackEvent.user, report);
-            resolve(report);
+            slack.sendReport(slackEvent.user, report)
+              .then((data)=>{
+                resolve(report);
+              })
+              .catch((error)=>{
+                reject('problem with sending message to slack' + error.message);
+                console.log(error);
+              });
           })
           .catch((error)=>{
             reject(error);
