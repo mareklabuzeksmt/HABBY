@@ -7,36 +7,6 @@ const byeRegexp = /bye-bye|bye|bb|wylogowuję się|kończę na dziś/g
 const reports = require('./lib/report')
 const async = require('async')
 
-// init
-db.connect();
-
-module.exports.authorize = (event, context, cb) => {
-  let permissions = [
-    'channels:write,channels:read,bot,chat:write:bot,chat:write:user,im:read,im:write'
-  ];
-
-  // TODO: replace client_id, redirect_uri depend on env
-  let url = 'https://slack.com/oauth/authorize?' +
-    'client_id=' + '36296541748.77041816724' + '&' +
-    'scope=' + 'channels:write,channels:read,bot,chat:write:bot,chat:write:user,im:read,im:write' + '&' +
-    'redirect_uri=' + 'https://bbuzqv0311.execute-api.us-east-1.amazonaws.com/dev/access'
-    ;
-
-  context.succeed({
-    location: url
-  });
-}
-
-module.exports.access = (event, context, cb) => {
-  slack.access(event.body.code, (err, accessToken) => {
-    db.saveAccessToken(accessToken);
-
-    context.succeed({
-      ok: 'ok'
-    });
-  });
-}
-
 module.exports.challenge = (event, context, cb) => {
   console.log('event', JSON.stringify(event, null, 2))
   
