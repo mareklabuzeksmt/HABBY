@@ -3,7 +3,7 @@
 const config = require('dotenv').config()
 const db = require('./lib/db')
 const slack = require('./lib/slack')
-const byeRegexp = /bye-bye|bye|bb|wylogowuję się|kończę/g
+const byeRegexp = /bye-bye|bye|bb|wylogowuję się|kończę na dziś/g
 const reports = require('./lib/report')
 const async = require('async')
 
