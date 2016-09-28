@@ -48,7 +48,8 @@ module.exports.cron = (event, context, cb) => {
                 if ('active' !== status.presence) {
                   console.log(userId + ':mark as logged out')
                   Promise.all([
-                    db.markAsLoggedIn(userId, 0)
+                    db.markAsLoggedIn(userId, 0),
+                    db.markAsLoggedOut(userId, 1)
                   ])
                   .then(() => {
                     console.log(userId + ':marked as logged out')

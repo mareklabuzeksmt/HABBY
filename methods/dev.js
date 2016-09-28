@@ -32,11 +32,14 @@ module.exports.debug = (event, context, cb) => {
               db.getUserCheckInTime(userId),
               db.getUserCheckOut(userId),
               db.getUserCheckOutTime(userId),
+              db.getMarkAsLoggedOut(userId),
+              db.canRemind(userId)
             ]).then((results) => {
               console.log('flags', results);
 
               data.flags = {
                 'appearedToday' : results[0],
+                'wasOfflineToday': results[6],
                 'reminded' : results[1],
                 'checkIn' : results[2],
                 'checkInTime' : results[3],
@@ -44,6 +47,7 @@ module.exports.debug = (event, context, cb) => {
                 'checkOutTime' : results[5]
               }
 
+              data.canRemind = results[7]
 
               callback(null, data)
             })
@@ -75,6 +79,42 @@ module.exports.debug = (event, context, cb) => {
         err ?
           context.fail(err) :
           context.succeed(result)
+    }
+  )
+}
+
+module.exports.reset = (event, context, cb) => {
+  console.log('reset')
+
+  async.waterfall([   
+        (callback) => {
+            db.getUsers()
+              .then((users) => { 
+                let promises = [];
+                // console.log('users', users) 
+                users.forEach(function (user) {
+                  console.log('clearing data:', user)
+
+                  promises.push(db.resetLoggedIn(user))
+                  promises.push(db.resetAppearedToday(user))
+                  promises.push(db.resetMarkAsLoggedOut(user))
+                  promises.push(db.resetReminded(user))
+                  promises.push(db.resetUserCheckInToday(user))
+                  promises.push(db.resetUserCheckOutToday(user))
+                  promises.push(db.resetUserCheckInTime(user))
+                  promises.push(db.resetUserCheckOutTime(user))
+                });
+
+                return Promise.all(promises)  
+              })
+              .then(() => {
+                callback(null)
+              })
+        }
+    ], (err, result) => {
+        err ?
+          context.fail(err) :
+          context.succeed({status : 'completed'})
     }
   )
 }

@@ -71,6 +71,7 @@ module.exports.midnight = (event, context, cb) => {
 
                   promises.push(db.resetLoggedIn(user))
                   promises.push(db.resetAppearedToday(user))
+                  promises.push(db.resetMarkAsLoggedOut(user))
                   promises.push(db.resetReminded(user))
                   promises.push(db.resetUserCheckInToday(user))
                   promises.push(db.resetUserCheckOutToday(user))
