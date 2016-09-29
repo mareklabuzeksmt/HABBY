@@ -44,7 +44,7 @@ functions:
     - http:
         path: midnight
         method: get
-    #- schedule: cron(0 0 * * * *)
+    - schedule: cron(1 0 * * ? *)
   
   challenge:
     handler: handler.challenge
