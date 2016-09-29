@@ -18,8 +18,8 @@ Tags in brackets bellow refer to groups of features in **[BDD spec](https://gith
 
   > IDEA: last message in the day on status channel can be assumed as check out, worth acknowledging with admin/owner
 
-* [Holidays] Members can notify about holidays (also each other?)
+  > IDEA: * [Holidays] Members can notify about holidays (also each other?)
 
-* [Personal time report] Member asks HABBY about this/last week/month personal time report.
+* [Personal time report] Member [asks](https://github.com/mareklabuzeksmt/HABBY/blob/master/personal-report) HABBY about this/last week/month personal time report.
 
-* [Admin time report] Admin asks HABBY about team time report.
+* [Admin time report] Admin [asks](https://github.com/mareklabuzeksmt/HABBY/blob/master/team-report) HABBY about team time report.
