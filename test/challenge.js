@@ -10,11 +10,11 @@ const expect      = mochaPlugin.chai.expect;
 const liveFunction = {
   region: process.env.SERVERLESS_REGION,
   lambdaFunction: process.env.SERVERLESS_PROJECT + '-challenge'
-}
+};
 
 describe('challenge', () => {
   before(function (done) {
-//  wrapper.init(liveFunction); // Run the deployed lambda 
+    // wrapper.init(liveFunction); // Run the deployed lambda
     wrapper.init(mod, {
       handler: 'challenge'
     });

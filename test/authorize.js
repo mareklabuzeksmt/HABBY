@@ -7,8 +7,6 @@ const mochaPlugin = require('serverless-mocha-plugin');
 const wrapper     = mochaPlugin.lambdaWrapper;
 const expect      = mochaPlugin.chai.expect;
 
-console.log(mod);
-
 const liveFunction = {
   region: process.env.SERVERLESS_REGION,
   lambdaFunction: process.env.SERVERLESS_PROJECT + '-authorize'

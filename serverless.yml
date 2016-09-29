@@ -1,82 +1,72 @@
-# Welcome to Serverless!
-#
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
-#
 # For full config options, check the docs:
 #    docs.serverless.com
-#
-# Happy Coding!
 
 service: habby
 
 provider:
   name: aws
   runtime: nodejs4.3
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
 
-# you can overwrite defaults here
-defaults:
- stage: dev
- region: us-east-1
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#  exclude:
-#    - exclude-me.js
-#  artifact: my-service-code.zip
+package:
+ exclude:
+  - .git
 
 functions:
   authorize:
-    handler: handler.authorize
+    handler: methods/oauth.authorize
     events:
     - http:
         path: authorize
         method: get
 
   access:
-    handler: handler.access
+    handler: methods/oauth.access
     events:
     - http:
         path: access
         method: get    
 
+  cron:
+    handler: methods/cron.cron
+    timeout: 30
+    events:
+    - http:
+        path: cron
+        method: get  
+    - schedule:
+        rate: rate(20 minutes)
+        enabled: true 
+
+  midnight:
+    handler: methods/midnight.midnight
+    timeout: 30
+    events:
+    - http:
+        path: midnight
+        method: get
+    - schedule: cron(1 0 * * ? *)
+  
   challenge:
     handler: handler.challenge
+    timeout: 15
     events:
     - http:
         path: challenge
         method: post  
 
-  index:
-    handler: handler.index
+  debug:
+    handler: methods/dev.debug
+    events:
+    - http:
+        path: debug
+        method: get  
 
-#    you can add any of the following events
-#    events:
-#      - http:
-#          path: users/create
-#          method: get
-#      - s3: ${env.BUCKET}
-#      - schedule: rate(10 minutes)
-#      - sns: greeter-topic
+  reset:
+    handler: methods/dev.reset
+    events:
+    - http:
+        path: reset
+        method: get  
 
 plugins:
 - serverless-offline
@@ -85,23 +75,22 @@ plugins:
 
 custom:
   projectName: Habby
+  remind: 
+    last_call: 9:30
+    interval: 20
+    timeout: 2
+  slack:
+    client_id: '85126897729.85066508995'
+    client_secret: '99b42a45ab597aa1fd85dea58e957a0a'
   redis:
-    host: pub-redis-14207.us-east-1-4.1.ec2.garantiadata.com
-    port: 14207
+    host: redis-10700.c9.us-east-1-4.ec2.cloud.redislabs.com
+    port: 10700
   writeEnvVars:
-      PROJECT_NAME: ${self:custom.projectName} 
+      PROJECT_NAME: ${self:custom.projectName}
       REDIS_HOST: ${self:custom.redis.host}
       REDIS_PORT: ${self:custom.redis.port}
-      
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+      REMIND_TIMOUT: ${self:custom.remind.timeout}
+      REMIND_INTERVAL: ${self:custom.remind.interval}
+      REMIND_LAST_CALL: ${self:custom.remind.last_call}
+      SLACK_CLIENT_ID: ${self:custom.slack.client_id}
+      SLACK_CLIENT_SECRET: ${self:custom.slack.client_secret}
