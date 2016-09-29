@@ -8,7 +8,7 @@ Tags in brackets bellow refer to groups of features in **[BDD spec](https://gith
 
   > IDEA: when member is reminded and answers but meanwhile checked in, HABBY can ask about republishing anyway
 
-* [Checking out] HABBY recognizes [bye-bye phrases](bye-bye phrases) and remembers when member is checking out
+* [Checking out] HABBY recognizes [bye-bye phrases](bye-bye-phrases) and remembers when member is checking out
 
   > IDEA: BRB handling
 
