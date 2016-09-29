@@ -13,8 +13,17 @@ module.exports.cron = (event, context, cb) => {
   // TODO: protect againt paralle execution of cron and midnight scripts
   async.waterfall([
     (callback) => {
-      db.getUsers().then((users) => { callback(null, users) })
-    },
+      db.getStatusChannel().then((channelId) => {
+        console.log('channelId', channelId)
+        callback(null, channelId)  
+      })
+      
+    },        
+    (channelId, callback) => {
+      slack.getChannelInfo(channelId).then((channelData) => {
+        callback(null, channelData.channel.members)  
+      })
+    },    
     (users, callback) => {
       console.log('users', users);
 
@@ -23,8 +32,17 @@ module.exports.cron = (event, context, cb) => {
         
         slack.checkUserPresence(userId)
         .then((status) => {
+            console.log(status)
             async.waterfall([
               (callback) => {
+                db.addUser(userId)
+                .then(() => {
+                    callback(null, true)
+                }).catch(() => {
+                    callback('Fail to add users')
+                })
+              },   
+              (result, callback) => {
                 // check if logged in
                 if ('active' === status.presence) {
                   console.log(userId + ':mark as logged in')
