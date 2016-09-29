@@ -13,11 +13,17 @@ Additionally, that can serve also the purpose of time tracking, both personally 
 
 # Using
 Follow installation manual: https://github.com/mareklabuzeksmt/HABBY/blob/master/HabbyInstallationManual.pdf
+
 Once you are set up:
+
 1. Invite all members of the team to status channel.
+
 2. After starting work, each member checks in on status channel - answers 3 Scrum questions or whatever team agrees. There is no specific phrase, saying anything counts as check-in.
+
 3. If a member does not check in during 15 minutes after becoming active on Slack, HABBY reminds them to check in.
+
 4. Each member should say one of bye-bye phrases (https://github.com/mareklabuzeksmt/HABBY/blob/master/bye-bye-phrases) before leaving the work.
+
 As a bonus, you can get time reports - say one of report phrases in DM to HABBY (https://github.com/mareklabuzeksmt/HABBY/blob/master/personal-report or https://github.com/mareklabuzeksmt/HABBY/blob/master/team-report).
 
 # NPM
