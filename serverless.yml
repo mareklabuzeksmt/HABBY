@@ -34,7 +34,7 @@ functions:
         path: cron
         method: get  
     - schedule:
-        rate: rate(20 minutes)
+        rate: rate(15 minutes)
         enabled: true 
 
   midnight:
@@ -77,8 +77,8 @@ custom:
   projectName: Habby
   remind: 
     last_call: 9:30
-    interval: 20
-    timeout: 2
+    interval: 15
+    timeout: 15
   slack:
     client_id: '85126897729.85066508995'
     client_secret: '99b42a45ab597aa1fd85dea58e957a0a'
