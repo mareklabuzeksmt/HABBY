@@ -8,17 +8,19 @@ const slack = require('../lib/slack')
 db.connect()
 
 module.exports.authorize = (event, context, cb) => {
-  console.log(event)
-  console.log(context)
-  console.log(config)
-
   let permissions = [
-    'channels:write,channels:read,bot,chat:write:bot,chat:write:user,im:read,im:write'
+    'channels:history',
+    'channels:read',
+    'bot',
+    'chat:write:bot',
+    'im:read',
+    'im:write',
+    'im:history'
   ]
 
   let url = 'https://slack.com/oauth/authorize?' +
     'client_id=' + config.SLACK_CLIENT_ID + '&' +
-    'scope=' + 'channels:write,channels:read,bot,chat:write:bot,chat:write:user,im:read,im:write' + '&' +
+    'scope=' + permissions.join(',') + '&' +
     'redirect_uri=' + 'https://' + event.headers.Host + '/' + event.stage + '/access'
     
   context.succeed({
@@ -27,12 +29,12 @@ module.exports.authorize = (event, context, cb) => {
 }
 
 module.exports.access = (event, context, cb) => {
-  slack.access(event.body.code, (err, accessToken) => {
-    console.log('accessToken', accessToken)
-    db.saveAccessToken(accessToken)
+  slack.access(event.query.code, (err, credentials) => {
+    db.saveAccessTokens(credentials.access_token, credentials.bot.bot_access_token)
+    db.saveBotUserId(credentials.bot.bot_user_id)
 
     context.succeed({
-      ok: 'ok'
+      ok: 'Habby is auhtorized to your Slack Team'
     })
   })
 }
