@@ -43,15 +43,30 @@ module.exports.cron = (event, context, cb) => {
                 })
               },   
               (result, callback) => {
+                db.getMarkAsLoggedOut(userId).then((wasOffline) => {
+                    console.log(userId + ':was offline today', wasOffline, Number(wasOffline) == 1)
+                    callback(null, Number(wasOffline) == 1)
+                }).catch(() => {
+                    callback('Fail to add users')
+                })
+              },                
+              (wasOffline, callback) => {
+                console.log('injected wasOffline', wasOffline)
                 // check if logged in
                 if ('active' === status.presence) {
                   console.log(userId + ':mark as logged in')
-                  Promise.all([
-                    db.markAsLoggedIn(userId, 1),
-                    db.markAsAppearedToday(userId)
-                  ])
+                  let actions = [
+                    db.markAsLoggedIn(userId, 1)
+                  ]
+                  if (wasOffline) actions.push(db.markAsAppearedToday(userId))
+
+                  Promise.all(actions)
                   .then(() => {
                     console.log(userId + ':marked as logged in')
+                    wasOffline ?
+                      console.log(userId + ':marked as appeared today') :
+                      console.log(userId + ':not marked as appeared today. Your was not offline today.') 
+
                     callback(null);
                   })
                   .catch(() => {

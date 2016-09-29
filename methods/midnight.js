@@ -23,9 +23,6 @@ module.exports.midnight = (event, context, cb) => {
                   console.log('processing:', user)
                   let promises = [];
 
-                  //db.setUserCheckInTime(user, 1)
-                  //db.setUserCheckOutTime(user, 1 + 5)
-
                   promises.push(db.getUserCheckInTime(user))
                   promises.push(db.getUserCheckOutTime(user))
                   promises.push(db.getUserHours(user, [`week-${currentWeek}`, `week-${currentWeek}-days`, `month-${currentMonth}`,`month-${currentMonth}-days`]))
