@@ -7,6 +7,8 @@ const byeRegexp = /bye-bye|bye|bb|wylogowuję się|kończę na dziś/g
 const reports = require('./lib/report')
 const async = require('async')
 
+db.connect()
+
 module.exports.challenge = (event, context, cb) => {
   console.log('event', JSON.stringify(event, null, 2))
   
@@ -32,8 +34,9 @@ module.exports.challenge = (event, context, cb) => {
         },
         (checkIn, callback) => {
           console.log('processing checking #2')
-
-          if (checkIn == false) {
+          console.log('checkIn', checkIn, Number(checkIn) == false)
+          
+          if (Number(checkIn) == false) {
             console.log(slackEvent.user + ' check in today')
 
             Promise.all([
@@ -43,7 +46,7 @@ module.exports.challenge = (event, context, cb) => {
             .then(() => {
               callback(null, true)
             })
-            .catch((checkIn) => {
+            .catch((err) => {
               callback('Error: checkin status could not be set for user')  
             })            
           } else {          
@@ -56,7 +59,8 @@ module.exports.challenge = (event, context, cb) => {
             if (byeRegexp.test(slackEvent.text)) {
               db.getUserCheckOut(slackEvent.user)
               .then((checkOut) => {
-                if (checkOut == false) {
+                console.log('checkOut', checkOut, Number(checkOut) == false)
+                if (Number(checkOut) == false) {
                   console.log(slackEvent.user + ' check out today')
 
                   Promise.all([
@@ -66,7 +70,7 @@ module.exports.challenge = (event, context, cb) => {
                   .then(() => {
                     callback(null, true)
                   })
-                  .catch((checkIn) => {
+                  .catch((err) => {
                     callback('Error: checkout status could not be set for user')  
                   })  
                 } else {
@@ -149,6 +153,20 @@ module.exports.challenge = (event, context, cb) => {
   if ('challenge' in event.body) {
     console.log('challenge')
     context.succeed({ challenge: event.body.challenge })
+  } else if (slackEvent && slackEvent.type === 'channel_created') {
+    console.log('handle channel_created')
+    console.log(slackEvent.channel)
+    if (slackEvent.channel.name == 'status') {
+      console.log('detected as status')
+
+      db.setStatusChannel(slackEvent.channel.id)
+      .then(() => {
+         context.succeed({status: 'ok'})
+      })
+      .catch((err) => {
+        context.fail(err)
+      })
+    }
   } else if (slackEvent && slackEvent.type === 'message') {
     console.log('message')
 
@@ -196,6 +214,6 @@ module.exports.challenge = (event, context, cb) => {
       context.fail('Error status channel could not be fetched')
     }) 
   } else {
-    context.fail('Unsupported operation')
+    context.succeed({status: 'Unsupported operation'})
   }
 }
