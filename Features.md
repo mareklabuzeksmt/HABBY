@@ -4,6 +4,8 @@ Tags in brackets bellow refer to groups of features in **[BDD spec](https://gith
 
 * [Checking in] HABBY remembers when member checks in
 
+  > IDEA: HABBY resonds to check-in in DM to member
+
 * [Reminder about checking in] When somebody logs in to Slack and is not checking in within say 15 mins (configurable), personal message from HABBY reminds them to do that. Answer to the bot, will publish status to status.
 
   > IDEA: when member is reminded and answers but meanwhile checked in, HABBY can ask about republishing anyway
