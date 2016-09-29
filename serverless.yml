@@ -80,11 +80,11 @@ custom:
     interval: 15
     timeout: 15
   slack:
-    client_id: '85126897729.85066508995'
-    client_secret: '99b42a45ab597aa1fd85dea58e957a0a'
+    client_id: [SLACK_CLIENT_ID]
+    client_secret: [SLACK_CLIENT_SECRET_ID]
   redis:
-    host: redis-10700.c9.us-east-1-4.ec2.cloud.redislabs.com
-    port: 10700
+    host: [REDIS_HOST]
+    port: [REDIS_PORT]
   writeEnvVars:
       PROJECT_NAME: ${self:custom.projectName}
       REDIS_HOST: ${self:custom.redis.host}
