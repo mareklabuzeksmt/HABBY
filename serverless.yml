@@ -16,7 +16,7 @@ functions:
     handler: methods/oauth.authorize
     events:
     - http:
-        path: oauth
+        path: authorize
         method: get
 
   access:
@@ -34,7 +34,7 @@ functions:
         path: cron
         method: get  
     - schedule:
-        rate: rate(${self:custom.remind.interval} minutes)
+        rate: rate(20 minutes)
         enabled: true 
 
   midnight:
@@ -78,13 +78,13 @@ custom:
   remind: 
     last_call: 9:30
     interval: 20
-    timeout: 15
+    timeout: 2
   slack:
-    client_id: '36296541748.77041816724'
-    client_secret: 'd00c2b0c484a82df73969ddafe609e9d'
+    client_id: '85126897729.85066508995'
+    client_secret: '99b42a45ab597aa1fd85dea58e957a0a'
   redis:
-    host: pub-redis-14207.us-east-1-4.1.ec2.garantiadata.com
-    port: 14207
+    host: redis-10700.c9.us-east-1-4.ec2.cloud.redislabs.com
+    port: 10700
   writeEnvVars:
       PROJECT_NAME: ${self:custom.projectName}
       REDIS_HOST: ${self:custom.redis.host}
